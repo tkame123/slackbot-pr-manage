@@ -1,12 +1,16 @@
 import * as functions from 'firebase-functions';
 import fetch from 'node-fetch';
 
-const SLACK_TOKEN: string = `j5Yuilt0O9nvZwDgzOE1LDXd`;
-// const GITHUB_TOKEN=`test`;
+const SLACK_TOKEN: string = `${functions.config().key.slack}`;
+const GITHUB_TOKEN: string = `${functions.config().key.github}`;
 const GITHUB_BASE_PATH: string = `https://api.github.com`;
 
 const INIT_ERROR_MESSAGE: string = `[ERROR] You need setup!!`;
 const PARAMS_ERROR_MESSAGE: string = `[ERROR] リポジトリ名は必須です`;
+
+const DEFAULT_HEAD_NAME :string = `master`;
+const DEFAULT_BASE_NAME :string  = `dev`;
+const DEFAULT_MESSAGE_NAME : string = ``;
 
 export const createPR = functions.https.onRequest(async (req, res) => {
 
@@ -25,39 +29,67 @@ export const createPR = functions.https.onRequest(async (req, res) => {
         // Params不足確認
         if ((params.length === 1) && (params[0] === "")) {res.send(PARAMS_ERROR_MESSAGE);}
 
-        [rep, head, base, message] = params;
+        [rep, base, head, message] = params;
+        if (!base) { base = DEFAULT_BASE_NAME }
+        if (!head) { head = DEFAULT_HEAD_NAME }
+        if (!message) { message = DEFAULT_MESSAGE_NAME }
 
-        const path: string = `${GITHUB_BASE_PATH}/repos/tkame123/study_javascript_designpattern/issues`;
+        const title: string = `PR: ${base} to ${head}`;
+        message = `${message}\n Create By Slack`;
 
-        const method = "GET";
+        // https://developer.github.com/v3/pulls/#create-a-pull-request
+        const path: string = `${GITHUB_BASE_PATH}/repos/${rep}/pulls?state=closed`;
 
+        const method :string = "POST";
         const headers = {
-            'Accept': 'application/vnd.github.shadow-cat-preview+json',
-            'Content-Type': 'application/vnd.github.shadow-cat-preview+json',
-            // 'Authorization': 'Bearer ' + GITHUB_TOKEN,
+            'Accept': `application/vnd.github.shadow-cat-preview+json`,
+            'Content-Type': `application/vnd.github.shadow-cat-preview+json`,
+            'Authorization': `token ${GITHUB_TOKEN}`,
         };
-
-        // const body = JSON.stringify({
-        //     state: "open"
-        // });
-
-        const option: any = {
-            method,
-            headers
-        };
-
-        await fetch(  path, option)
-            .then((response: any) => {
-               console.log(response);
-            }).catch((e) => {
-                throw e;
+        const body = JSON.stringify({
+            title: title,
+            head: head,
+            base: base,
+            body: message,
         });
 
-        res.send(`${rep}\n${head}\n${base}\n${message}`);
+        const option = {
+            body,
+            method,
+            headers,
+        };
+
+        // ログ出力
+        console.log(`params:`, rep, head, base, message);
+
+        const response = await fetch(path, option);
+        const status = await response.status;
+        const statusText = await response.statusText;
+        const json = await response.json();
+
+        // ステータスコード201以外はエラー返信
+        if (status !== 201) { throw Error(`${status}: ${statusText}`) }
+
+        // ログ出力
+        console.log(`${status}: ${statusText}`);
+        console.log(json);
+
+        res.send({
+                "text": json.title,
+                "attachments": [
+                    {
+                        "text": json.html_url
+                    }
+                ]
+            });
 
     } catch(e) {
-        console.log(e);
-        res.send(`[ERROR]${e}`);
+        // ログ出力
+        console.error(`[ERROR] ${e}`);
+        res.send({
+            "response_type": "ephemeral",
+            "text": `[ERROR] ${e}`
+        });
     }
 
 });
