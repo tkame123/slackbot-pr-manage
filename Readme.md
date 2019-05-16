@@ -5,15 +5,15 @@ Github PR create tools for Slack.
 
 slashCommands(sample)
 
-`/pr repo(:own/:repo) base head message`
+`/pr repo(:own/:repo) head base message`
 
 Ex: dev(branch) => master(branch)
 `/pr <your repo name> dev master`
 
 default value
 ```
-base: dev
-head: master
+head: dev
+base: master
 ```
 
 # Setting

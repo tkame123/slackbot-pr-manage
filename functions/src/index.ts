@@ -8,8 +8,8 @@ const GITHUB_BASE_PATH: string = `https://api.github.com`;
 const INIT_ERROR_MESSAGE: string = `[ERROR] You need setup!!`;
 const PARAMS_ERROR_MESSAGE: string = `[ERROR] リポジトリ名は必須です`;
 
-const DEFAULT_HEAD_NAME :string = `master`;
-const DEFAULT_BASE_NAME :string  = `dev`;
+const DEFAULT_HEAD_NAME :string = `dev`;
+const DEFAULT_BASE_NAME :string  = `master`;
 const DEFAULT_MESSAGE_NAME : string = ``;
 
 export const createPR = functions.https.onRequest(async (req, res) => {
@@ -29,12 +29,12 @@ export const createPR = functions.https.onRequest(async (req, res) => {
         // Params不足確認
         if ((params.length === 1) && (params[0] === "")) {res.send(PARAMS_ERROR_MESSAGE);}
 
-        [rep, base, head, message] = params;
-        if (!base) { base = DEFAULT_BASE_NAME }
+        [rep, head, base, message] = params;
         if (!head) { head = DEFAULT_HEAD_NAME }
+        if (!base) { base = DEFAULT_BASE_NAME }
         if (!message) { message = DEFAULT_MESSAGE_NAME }
 
-        const title: string = `PR: ${base} to ${head}`;
+        const title: string = `PR: ${head} to ${base}`;
         message = `${message}\n Create By Slack`;
 
         // https://developer.github.com/v3/pulls/#create-a-pull-request
