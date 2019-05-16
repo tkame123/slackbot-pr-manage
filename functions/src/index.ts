@@ -19,7 +19,7 @@ export const createPR = functions.https.onRequest(async (req, res) => {
 
     try {
 
-        let rep: string;        // 対象リポジトリ名 ※必須 (:owner/:repo)
+        let repo: string;        // 対象リポジトリ名 ※必須 (:owner/:repo)
         let head: string;       // マージ元ブランチ
         let base: string;       // マージ先ブランチ
         let message: string;    // メッセージ
@@ -29,7 +29,7 @@ export const createPR = functions.https.onRequest(async (req, res) => {
         // Params不足確認
         if ((params.length === 1) && (params[0] === "")) {res.send(PARAMS_ERROR_MESSAGE);}
 
-        [rep, head, base, message] = params;
+        [repo, head, base, message] = params;
         if (!head) { head = DEFAULT_HEAD_NAME }
         if (!base) { base = DEFAULT_BASE_NAME }
         if (!message) { message = DEFAULT_MESSAGE_NAME }
@@ -38,7 +38,7 @@ export const createPR = functions.https.onRequest(async (req, res) => {
         message = `${message}\n Create By Slack`;
 
         // https://developer.github.com/v3/pulls/#create-a-pull-request
-        const path: string = `${GITHUB_BASE_PATH}/repos/${rep}/pulls?state=closed`;
+        const path: string = `${GITHUB_BASE_PATH}/repos/${repo}/pulls?state=closed`;
 
         const method :string = "POST";
         const headers = {
@@ -60,7 +60,7 @@ export const createPR = functions.https.onRequest(async (req, res) => {
         };
 
         // ログ出力
-        console.log(`params:`, rep, head, base, message);
+        console.log(`params:`, repo, head, base, message);
 
         const response = await fetch(path, option);
         const status = await response.status;
@@ -76,7 +76,7 @@ export const createPR = functions.https.onRequest(async (req, res) => {
 
         res.send({
                 "response_type": "in_channel",
-                "text": json.title,
+                "text": `${json.title}(${repo})`,
                 "attachments": [
                     {
                         "text": json.html_url
