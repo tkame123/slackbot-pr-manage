@@ -75,6 +75,7 @@ export const createPR = functions.https.onRequest(async (req, res) => {
         console.log(json);
 
         res.send({
+                "response_type": "in_channel",
                 "text": json.title,
                 "attachments": [
                     {
@@ -87,7 +88,7 @@ export const createPR = functions.https.onRequest(async (req, res) => {
         // ログ出力
         console.error(`[ERROR] ${e}`);
         res.send({
-            "response_type": "ephemeral",
+            "response_type": "in_channel",
             "text": `[ERROR] ${e}`
         });
     }
