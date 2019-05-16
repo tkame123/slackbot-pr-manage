@@ -60,7 +60,13 @@ export const createPR = functions.https.onRequest(async (req, res) => {
         };
 
         // ログ出力
-        console.log(`params:`, repo, head, base, message);
+        console.log({
+            "params": {
+                "repo": repo,
+                "head": head,
+                "base": base,
+                "message": message
+            }});
 
         const response = await fetch(path, option);
         const status = await response.status;
