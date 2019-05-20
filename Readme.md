@@ -24,7 +24,7 @@ base: master
 ## Frebase Deploy
 
 ```$xslt
-firebase deploy --only functions createPR
+firebase deploy --only functions:createPR
 ```
 
 ```
