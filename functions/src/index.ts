@@ -8,14 +8,14 @@ const GITHUB_BASE_PATH: string = `https://api.github.com`;
 const INIT_ERROR_MESSAGE: string = `[ERROR] You need setup!!`;
 const PARAMS_ERROR_MESSAGE: string = `[ERROR] リポジトリ名は必須です`;
 
-const DEFAULT_HEAD_NAME :string = `dev`;
+const DEFAULT_HEAD_NAME :string = `develop`;
 const DEFAULT_BASE_NAME :string  = `master`;
 const DEFAULT_MESSAGE_NAME : string = ``;
 
 export const createPR = functions.https.onRequest(async (req, res) => {
 
     // Slackとの認証確認
-    if (req.body.token !== SLACK_TOKEN) { res.send(INIT_ERROR_MESSAGE);}
+    if (req.body.token !== SLACK_TOKEN) { throw Error(`${INIT_ERROR_MESSAGE}`)}
 
     try {
 
@@ -27,7 +27,7 @@ export const createPR = functions.https.onRequest(async (req, res) => {
         const params: string[] = req.body.text.split(/\s+/);
 
         // Params不足確認
-        if ((params.length === 1) && (params[0] === "")) {res.send(PARAMS_ERROR_MESSAGE);}
+        if ((params.length === 1) && (params[0] === "")) {throw Error(`${PARAMS_ERROR_MESSAGE}`)}
 
         [repo, head, base, message] = params;
         if (!head) { head = DEFAULT_HEAD_NAME }
