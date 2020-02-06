@@ -8,11 +8,11 @@ slashCommands(sample)
 `/pr repo(:own/:repo) head base message`
 
 Ex: dev(branch) => master(branch)
-`/pr <your repo name> dev master`
+`/pr <your repo name> develop master`
 
 default value
 ```
-head: dev
+head: develop
 base: master
 ```
 
